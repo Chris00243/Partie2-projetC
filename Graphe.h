@@ -65,6 +65,9 @@ void lecture_graphe(Graphe *G, FILE * f);
 void affichageGrapheSVG(Graphe *G, char* nomInstance);
 
 
+// fonction de la question 7 : fonction codée
+
+int plus_petit_nbr_arete(Graphe *G, int u, int v);
 
 
 
