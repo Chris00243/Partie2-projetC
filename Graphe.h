@@ -1,8 +1,14 @@
 #ifndef __GRAPHE_H__
 #define __GRAPHE_H__
-#include<stdlib.h>
 #include<stdio.h>
-#include "Struct_Liste.h"
+#include<stdlib.h>
+#include<math.h>
+#include"Graphe.h"
+#include"SVGwriter.h"
+#include"entree_sortie.h"
+#include"Struct_Liste.h"
+#include"Struct_File.h"
+
 
 typedef struct{
   int u,v;        /* Numeros des sommets extremité */
@@ -65,10 +71,13 @@ void lecture_graphe(Graphe *G, FILE * f);
 void affichageGrapheSVG(Graphe *G, char* nomInstance);
 
 
-// fonction de la question 7 : fonction codée
+// fonction de la question 7.3 : fonction codée
 
 int plus_petit_nbr_arete(Graphe *G, int u, int v);
 
-
+// fonction : question 7.5
+/*
+void ecrire_file(char* filenamencha, Graphe* G);
+*/
 
 #endif

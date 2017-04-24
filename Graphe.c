@@ -1,10 +1,4 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-#include"Graphe.h"
-#include"SVGwriter.h"
-#include"entree_sortie.h"
-#include"Struct_Liste.h"
+#include "Graphe.h"
 
 
 
@@ -29,15 +23,20 @@ void ajout_voisin(Graphe* G, int u, int v){
 
 }
 
-Arete* acces_arete(Graphe* G, int u, int v){
+Arete* acces_arete(Graphe* G, int u, int v)
+{
   Cellule_arete *coura;
 
   coura=G->T_som[u]->L_voisin;
-  while ( (coura!=NULL)&&(coura->a->u!=u)&&(coura->a->v!=v))
-    coura=coura->suiv;
 
-  if (coura==NULL) return NULL;
-            else  return coura->a;
+  while ( (coura!=NULL)&&( ( (coura->a->u!=u) && (coura->a->v!=v) ) || ( (coura->a->u!=v) && (coura->a->v!=u) ) ) ){
+   
+	 coura=coura->suiv;
+  }
+
+  if (coura==NULL){printf("\nNON\n"); return NULL;}
+  else {printf("\nOUI\n"); return coura->a;}
+
 }
 
 void lecture_graphe(Graphe *G, FILE * f){
@@ -87,7 +86,7 @@ void lecture_graphe(Graphe *G, FILE * f){
 }
 
 
-void afficheGrapheSVG(Graphe *G, char* nomInstance){
+void affichageGrapheSVG(Graphe *G, char* nomInstance){
 
   SVGwriter svg;
   double maxx=0,maxy=0,minx=1e6,miny=1e6;
@@ -138,7 +137,7 @@ void afficheGrapheSVG(Graphe *G, char* nomInstance){
 
 }
 
-// fonction de la question 7 : fonction codée
+// fonction de la question 7.3 : fonction codée
 
 int plus_petit_nbr_arete(Graphe *G, int u, int v){
 
@@ -154,8 +153,8 @@ int plus_petit_nbr_arete(Graphe *G, int u, int v){
 	
 	int *AR =(int *)malloc(sizeof(int)*G->nbsom); // tableau pour marquer le nombre d'arretes entre u à tious les autres points y compris v. 
 
-	if(visit == NULL ) return -404 // -404 c'est pour signaler l'echec d'allocation
-	if(AR == NULL ) return -405 // -405 c'est pour signaler l'echec d'allocation
+	if(visit == NULL ) return -404; // -404 c'est pour signaler l'echec d'allocation
+	if(AR == NULL ) return -405; // -405 c'est pour signaler l'echec d'allocation
 
 	for(i=0;i<G->nbsom;i++){ visit[i]=0; AR[i]= 600; } // initialisation du tableau visit à 0 et AR à 600 : considéré comme la distance MAX... 
 
@@ -174,10 +173,11 @@ int plus_petit_nbr_arete(Graphe *G, int u, int v){
 			if(m=n) m = cour->a->v;   // si m = n alors m doit prendre la valeur de l'autre extreme de l'arete voisine de u 
 
 			if(visit[m] == 0){ // donc m pas encore visité
-			
+				
+				nbr = AR[n]+1;
 				visit[m] = 1;
 				enfile(&F, m);
-				 nbr = AR[n]+1;
+				 
 
 			}
 			
@@ -192,7 +192,48 @@ int plus_petit_nbr_arete(Graphe *G, int u, int v){
 	return AR[v];
 } 
 
+// question 7.5
+/*
+void ecrire_file(char* filenamencha, Graphe* G)
+{
+	
+	FILE* F = fopen("filenamencha", "w+");
+	if(F==NULL){ printf("\n error 407 "); return;}
 
+	int s, p;//sommets source et puits
 
+	int i;
+	for(i=0; i<G->nbcommod; i++){
+		
+		s=G->T_commod[i].e1;
+		p=G->T_commod[i].e2;
+		
+		Sommet* cour=G->T_som[s];//pointe sur le sommet source
+		
+		if(cour->suiv->num==p){
+			fwrite(F,"%d %d -1\n",p,s);
+		}		
+		else{
 
+		cour=cour->suiv;		
+
+		char* numSommets[G->nbsom*2];//stocke la liste des sommets entre les commodités
+		char* somCour[2];//stocke le sommet courant
+
+		while(cour){
+			sprintf(somCour,"%d",cour->num);//écrit le numero courant dans une chaine de caractères
+			strcat(numSommets,somCour);//rajoute le sommet courant dans la chaine de caracteres
+			cour=cour->suiv;
+		}
+		
+		fwrite(F,"%d %d %s -1\n",p,s,numSommets);
+		
+		}
+
+	}
+
+	fclose(F);
+}
+
+*/
 

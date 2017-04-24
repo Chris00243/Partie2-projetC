@@ -69,11 +69,12 @@ FILE *f ;
     }
   if (c=='.')
     c = getc(f) ;
-  while ((isdigit((int)c)&&(c!='.')))
-    {
-    v = 10*v+(c-'0') ;
-    c = getc(f) ;
-    }
+  while ((isdigit((int)c))&&(c!='.')){
+   
+	 v = 10*v+(c-'0') ;
+    	c = getc(f) ;
+  }
+
   if (sign)
     v = -1*v ;
   ungetc(c,f) ;
