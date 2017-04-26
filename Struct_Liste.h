@@ -8,19 +8,22 @@ typedef struct cell_entier{
   struct cell_entier *suiv;
 } Cell_entier;
 
-typedef Cell_entier * ListeEntier;
+//typedef Cell_entier ListeEntier;
 
 /* Initialisation d une file */
-void Init_Liste(ListeEntier *L);
+void Init_Liste( Cell_entier **L);
 
 /* Teste si la file est vide */
-int estLileVide(ListeEntier *L);
+int estLileVide(Cell_entier *L);
 
 /* Ajoute un element don`e en tete de liste */
-void ajoute_en_tete(ListeEntier* L, int u);
+void ajoute_en_tete(Cell_entier** L, int u);
 
 /* Vide et desalloue une liste */
-void desalloue(ListeEntier *L);
+void desalloue(Cell_entier **L);
 
+
+// fonction ajoutée : affichage de ListeEntier
+void afficherListeEntier(Cell_entier* L);
 
 #endif 

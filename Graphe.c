@@ -29,13 +29,18 @@ Arete* acces_arete(Graphe* G, int u, int v)
 
   coura=G->T_som[u]->L_voisin;
 
-  while ( (coura!=NULL)&&( ( (coura->a->u!=u) && (coura->a->v!=v) ) || ( (coura->a->u!=v) && (coura->a->v!=u) ) ) ){
+  while(coura!=NULL){
+	if( ( (coura->a->u=u) && (coura->a->v=v) ) || ( (coura->a->u=v) && (coura->a->v=u) ) ){
+		
+		printf("\nOUI\n"); 
+		return coura->a;
+	}
    
 	 coura=coura->suiv;
   }
 
-  if (coura==NULL){printf("\nNON\n"); return NULL;}
-  else {printf("\nOUI\n"); return coura->a;}
+  	printf("\nNON\n"); 
+	return NULL;
 
 }
 
@@ -137,17 +142,19 @@ void affichageGrapheSVG(Graphe *G, char* nomInstance){
 
 }
 
-// fonction de la question 7.3 : fonction codée
+// fonction de la question 7.2 : fonction codée
 
 int plus_petit_nbr_arete(Graphe *G, int u, int v){
 
+	// u et v sont les numéros de sommets. le sommet numéro u correspond aux tableaux visit et AR à l'indice u-1
+
 	Cellule_arete *cour;
 
-	int n, m,i, nbr;
+	int n, m,i;
 
 	S_file F; Init_file(&F); // la file 
 
-	
+	printf("\n G = %d; %d; %d", G->T_som[u]->num, G->T_som[u]->L_voisin->a->u, G->T_som[u]->L_voisin->a->v);
 
 	int *visit =(int *)malloc(sizeof(int)*G->nbsom); // tableau pour marquer la visite d'un point 
 	
@@ -156,84 +163,188 @@ int plus_petit_nbr_arete(Graphe *G, int u, int v){
 	if(visit == NULL ) return -404; // -404 c'est pour signaler l'echec d'allocation
 	if(AR == NULL ) return -405; // -405 c'est pour signaler l'echec d'allocation
 
-	for(i=0;i<G->nbsom;i++){ visit[i]=0; AR[i]= 600; } // initialisation du tableau visit à 0 et AR à 600 : considéré comme la distance MAX... 
-
-	AR[u] = 0; // un point est à distance de 0 de lui-même
-	visit[u] = 1; enfile(&F, u); // on marque la visite du point u et on enfile 
+	for(i=0;i<G->nbsom;i++){ visit[i]=0; AR[i]= 600; } // initialisation du tableau visit à 0 et AR à 600 : considéré comme la distance MAX...l'infini 
+printf("\nDDDDDDD %d   kkkk %d", AR[11], G->nbsom);
+	AR[u-1] = 0; // un point est à distance de 0 de lui-même
+	//visit[u] = 1; 
+	enfile(&F, u); // on marque la visite du point u et on enfile 
 
 	while( !(estFileVide(&F)) ){
 
-		n = defile(&F);
+		do{
+			if(!(estFileVide(&F))) n = defile(&F);
+			else return AR[v-1];
+
+		}while(visit[n-1]==1);
 		
-		cour = G->T_som[u]->L_voisin;
+				
+		printf("\nn = %d", n);
+		cour = G->T_som[n]->L_voisin;
+		int nbr = AR[n-1]+1;
+		
 
 		while(cour){ // cour != NULL
 
 			m = cour->a->u;          // m prend la valeur de l'extreme de l'arête voisine de u donc de n
-			if(m=n) m = cour->a->v;   // si m = n alors m doit prendre la valeur de l'autre extreme de l'arete voisine de u 
-
-			if(visit[m] == 0){ // donc m pas encore visité
-				
-				nbr = AR[n]+1;
-				visit[m] = 1;
-				enfile(&F, m);
-				 
-
-			}
+printf("\nm = %d", m);			
 			
-			if(AR[m]> nbr) AR[m] = nbr; // actualisation du plus petit nbr d'arêtes
+			if(m==n) m = cour->a->v;   // si m = n alors m doit prendre la valeur de l'autre extreme de l'arete voisine de u 
+printf("\nm = %d", m);
+			if(m==n) cour = cour->suiv; // si c'est toujours le cas, on passe au suivant
+printf("\nm = %d", m);
+				
+			if(visit[m-1]==0) enfile(&F, m);
 
+			if(AR[m-1] > nbr) AR[m-1] = nbr; // actualisation du plus petit nbr d'arêtes
+			printf("\nJJJJJJJJJJ AR m  %d", AR[m-1]);
+			if(m==v) return AR[v-1]; // on a trouvé ce qu'on cherche, on peut arreter le processus 
+			
 			cour = cour->suiv; 		
 		}
+		
+		visit[n-1] = 1; // n a été visté
 
 
 	}
 		
-	return AR[v];
+	return AR[v-1];
 } 
 
-// question 7.5
-/*
+//fonction 7.3 et 7.4 : la transformation de la fonction 7.2 Je propose de stocker l'aborescence issue de u créant un tableau des précédents
+
+Cell_entier* chemin(Graphe *G, int u, int v){
+
+	// u et v sont les numéros de sommets. le sommet numéro u correspond aux tableaux visit et AR à l'indice u-1
+
+	Cellule_arete *cour;
+
+	int c = v; // IMPORTANT
+	int n, m,i;
+
+	S_file F; Init_file(&F); // la file 
+
+	printf("\n G = %d; %d; %d", G->T_som[u]->num, G->T_som[u]->L_voisin->a->u, G->T_som[u]->L_voisin->a->v);
+
+	int *visit =(int *)malloc(sizeof(int)*G->nbsom); // tableau pour marquer la visite d'un point 
+	
+	int *AR =(int *)malloc(sizeof(int)*G->nbsom); // tableau pour marquer le nombre d'arretes entre u à tous les autres points y compris v. 
+	
+	int *PREC =(int *)malloc(sizeof(int)*G->nbsom); // tableau contenant les précédants
+
+	if(visit == NULL ){ printf("Echec Alloc visit"); return NULL;} 
+	if(AR == NULL ) { printf("Echec Alloc AR"); return NULL;}   
+	if(PREC == NULL ){ printf("Echec Alloc PREC"); return NULL;} 
+
+	for(i=0;i<G->nbsom;i++){ visit[i]=0; AR[i]= 600; PREC[i]=-1; } // initialisation du tableau visit à 0 et AR à 600 : considéré comme la distance MAX...l'infini et PREC à -1 
+printf("\nDDDDDDD %d   kkkk %d", AR[11], G->nbsom);
+	AR[u-1] = 0; // un point est à distance de 0 de lui-même
+	//visit[u] = 1; 
+	enfile(&F, u); // on marque la visite du point u et on enfile 
+
+	while( !(estFileVide(&F)) ){
+
+		do{
+			if(!(estFileVide(&F))) n = defile(&F);
+			else return NULL;
+
+		}while(visit[n-1]==1);
+		
+				
+		printf("\nn = %d", n);
+		cour = G->T_som[n]->L_voisin;
+		int nbr = AR[n-1]+1;
+		
+
+		while(cour){ // cour != NULL
+
+			m = cour->a->u;          // m prend la valeur de l'extreme de l'arête voisine de u donc de n
+printf("\nm = %d", m);			
+			
+			if(m==n) m = cour->a->v;   // si m = n alors m doit prendre la valeur de l'autre extreme de l'arete voisine de u 
+printf("\nm = %d", m);
+			if(m==n) cour = cour->suiv; // si c'est toujours le cas, on passe au suivant
+printf("\nm = %d", m);
+				
+			if(visit[m-1]==0) enfile(&F, m);
+
+			if(AR[m-1] > nbr){
+
+				 AR[m-1] = nbr; // actualisation du plus petit nbr d'arêtes
+				PREC[m-1] = n;  // actualisation du précédent de m par n
+
+				if(m==c){// pas la peine de continuer les autres tours, on a trouvé ce qu'on cherchait
+					
+					Cell_entier *L;
+
+					Init_Liste(&L);
+
+					
+					int j = PREC[c-1]; // i prend le précédent de v
+	
+					while(j!=-1){ // j = -1 c à d pas de précédent
+		
+						 // ajout de v et précédents
+						ajoute_en_tete(&L,c);
+						
+						c = j;
+						j = PREC[c-1];
+
+					}
+					ajoute_en_tete(&L,c);
+					return L;
+
+
+
+				}
+
+			}
+			printf("\nJJJJJJJJJJ AR m  %d", AR[m-1]);
+			cour = cour->suiv; 		
+		}
+		
+		visit[n-1] = 1; // n a été visté
+
+
+	}
+	
+	return NULL;
+}
+
+ 
+
+
+// question 7.4 et 7.5
+
 void ecrire_file(char* filenamencha, Graphe* G)
 {
 	
-	FILE* F = fopen("filenamencha", "w+");
-	if(F==NULL){ printf("\n error 407 "); return;}
+	FILE* f = fopen(filenamencha, "w+");
+	if(f==NULL){ printf("\n error ecrire_file "); return;}
 
-	int s, p;//sommets source et puits
+	int nbcom = G->nbcommod;
+	int i, a, b;
 
-	int i;
-	for(i=0; i<G->nbcommod; i++){
-		
-		s=G->T_commod[i].e1;
-		p=G->T_commod[i].e2;
-		
-		Sommet* cour=G->T_som[s];//pointe sur le sommet source
-		
-		if(cour->suiv->num==p){
-			fwrite(F,"%d %d -1\n",p,s);
-		}		
-		else{
+	Cell_entier *L;
+	Init_Liste(&L);
+	
+	for (i=0;i<G->nbcommod;i++){
+   
+		 	
+   		a = G->T_commod[i].e1;
+    		b = G->T_commod[i].e2;
 
-		cour=cour->suiv;		
+		L = chemin(G,a,b);
 
-		char* numSommets[G->nbsom*2];//stocke la liste des sommets entre les commodités
-		char* somCour[2];//stocke le sommet courant
+		while(L){
 
-		while(cour){
-			sprintf(somCour,"%d",cour->num);//écrit le numero courant dans une chaine de caractères
-			strcat(numSommets,somCour);//rajoute le sommet courant dans la chaine de caracteres
-			cour=cour->suiv;
-		}
-		
-		fwrite(F,"%d %d %s -1\n",p,s,numSommets);
-		
+			fprintf(f,"%d ", L->u);
+			L=L->suiv;
+	
 		}
 
+		fprintf(f,"-1\n");
 	}
 
-	fclose(F);
+	fclose(f);
 }
-
-*/
 

@@ -71,13 +71,14 @@ void lecture_graphe(Graphe *G, FILE * f);
 void affichageGrapheSVG(Graphe *G, char* nomInstance);
 
 
-// fonction de la question 7.3 : fonction codée
-
+// fonction de la question 7.2 : fonction codée
 int plus_petit_nbr_arete(Graphe *G, int u, int v);
 
-// fonction : question 7.5
-/*
+//fonction 7.3 et 7.4 : la transformation de la fonction 7.2 Je propose de stocker l'aborescence issue de u créant un tableau des précédents
+Cell_entier* chemin(Graphe *G, int u, int v);
+
+// fonction : question 7.4 et 7.5
 void ecrire_file(char* filenamencha, Graphe* G);
-*/
+
 
 #endif

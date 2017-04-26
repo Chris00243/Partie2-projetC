@@ -9,8 +9,9 @@
  		puts(" 1. Ajoutez un voisin \n "); \
 	        puts(" 2. Vérifier l'existence d'une arête \n"); \
 	        puts(" 3. Afficher un graphe SVG \n"); \
-	        puts(" 4. Ecrire un graphedans un fichier \n"); \
-		puts(" 5. Plus petit nombre d'arêtes\n"); \
+		puts(" 4. Plus petit nombre d'arêtes\n"); \
+		puts(" 5. Liste du chemin u à v \n"); \
+		puts(" 6. ecrire dans un fichier les chemins u à v \n"); \
 		puts(" 15. Pour sortir \n"); \
 
 int main(int argc,char**argv)
@@ -90,22 +91,34 @@ int main(int argc,char**argv)
 			}
 
 			case 4 :{
-				
-					//ecrire_file(filenamencha, &G);
-	
-			}
-
-			case 5 :{
 					printf("Entrez le premier entier : ");
 					scanf("%d", &u);
 					printf("Entrez le second entier : ");
 					scanf("%d", &v);
 
 					nbr = plus_petit_nbr_arete(&G,u,v);
-					printf(" nombre d'arêtes de %d à %d est %d\n", u,v,nbr); // si nbr == 600; d'après la fonction il n'y a pas de chemin de u à v
+					printf("\n nombre d'arêtes de %d à %d est %d\n", u,v,nbr); // si nbr == 600; d'après la fonction il n'y a pas de chemin de u à v
 					
 					break;
 
+			}
+
+			case 5 : {
+
+					printf("Entrez le premier entier : ");
+					scanf("%d", &u);
+					printf("Entrez le second entier : ");
+					scanf("%d", &v);
+					Cell_entier *L;
+					L = chemin(&G, u,  v);
+					afficherListeEntier(L);
+					break;
+			}
+
+			case 6 : {
+
+					ecrire_file(filenamencha, &G);
+					break;
 			}
 
 			case 15 : {
