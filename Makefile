@@ -12,7 +12,7 @@ MainGraphe: MainGraphe.o Graphe.o entree_sortie.o SVGwriter.o Struct_File.o Stru
 MainGraphe.o: MainGraphe.c Graphe.h
 	gcc -c MainGraphe.c
 
-Graphe.o: Graphe.c Graphe.h SVGwriter.h Struct_File.h Struct_Liste.h
+Graphe.o: Graphe.c Graphe.h SVGwriter.h Struct_File.h Struct_Liste.h evaluation_NChaines.h
 	gcc -c Graphe.c
 
 Struct_File.o: Struct_File.c Struct_File.h

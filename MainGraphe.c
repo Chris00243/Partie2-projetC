@@ -12,12 +12,14 @@
 		puts(" 4. Plus petit nombre d'arêtes\n"); \
 		puts(" 5. Liste du chemin u à v \n"); \
 		puts(" 6. ecrire dans un fichier les chemins u à v \n"); \
+		puts(" 7. dijikstra \n"); \
+		puts(" 8. dijikstra sur toutes les commodités du Graphe et leurs evaluations \n"); \
 		puts(" 15. Pour sortir \n"); \
 
 int main(int argc,char**argv)
 {
 
-  char filename[104],filenameres[104],filenamencha[104];
+  char filename[104],filenameres[104],filenamencha[104], fichier[104], fic_eval[104];
   //int chmeth;
 
   if(argc!=2){
@@ -52,7 +54,7 @@ int main(int argc,char**argv)
 	Arete * a;
   
 
-	int choix;
+	int choix, select;
 	
 
 	int u, v, nbr;
@@ -118,6 +120,56 @@ int main(int argc,char**argv)
 			case 6 : {
 
 					ecrire_file(filenamencha, &G);
+					break;
+			}
+
+			case 7 : {
+
+					printf("Entrez le premier entier : ");
+					scanf("%d", &u);
+					printf("Entrez le second entier : ");
+					scanf("%d", &v);
+					double nb = dijikstra(&G,u,v); 	
+					printf("\n longueur = %lf\n\n", nb);
+					break;
+			}
+
+			case 8 : {
+					
+					printf("Entrez le nom du fichier dans lequel vous souhaitez stocker vos résultats : ");
+					scanf("%s", fichier);
+					
+					printf("\n 1. 00783_rat.res \n 2. 05934_rl.res \n 3. 07397_pla.res\n");
+					printf("Pour l'évaluation, choisir parmi ces trois fichiers : ");
+					scanf("%d", &select);
+
+					switch(select){
+
+						case 1 : {
+								 strcpy(fic_eval,"00783_rat.res");
+								 ecrire_eval(&G, fichier,fic_eval);
+								break;
+						}
+			
+						case 2 : {
+								 strcpy(fic_eval,"05934_rl.res");
+								 ecrire_eval(&G, fichier,fic_eval);
+								break;
+						}
+
+						case 3 : {
+								 strcpy(fic_eval,"07397_pla.res");
+								 ecrire_eval(&G, fichier,fic_eval);
+								break;
+						}
+
+						default : {
+								 printf("Au revoir");
+								break;
+						}
+
+					}
+					
 					break;
 			}
 

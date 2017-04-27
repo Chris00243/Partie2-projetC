@@ -164,7 +164,7 @@ int plus_petit_nbr_arete(Graphe *G, int u, int v){
 	if(AR == NULL ) return -405; // -405 c'est pour signaler l'echec d'allocation
 
 	for(i=0;i<G->nbsom;i++){ visit[i]=0; AR[i]= 600; } // initialisation du tableau visit à 0 et AR à 600 : considéré comme la distance MAX...l'infini 
-printf("\nDDDDDDD %d   kkkk %d", AR[11], G->nbsom);
+
 	AR[u-1] = 0; // un point est à distance de 0 de lui-même
 	//visit[u] = 1; 
 	enfile(&F, u); // on marque la visite du point u et on enfile 
@@ -186,17 +186,17 @@ printf("\nDDDDDDD %d   kkkk %d", AR[11], G->nbsom);
 		while(cour){ // cour != NULL
 
 			m = cour->a->u;          // m prend la valeur de l'extreme de l'arête voisine de u donc de n
-printf("\nm = %d", m);			
+			
 			
 			if(m==n) m = cour->a->v;   // si m = n alors m doit prendre la valeur de l'autre extreme de l'arete voisine de u 
-printf("\nm = %d", m);
+
 			if(m==n) cour = cour->suiv; // si c'est toujours le cas, on passe au suivant
-printf("\nm = %d", m);
+
 				
 			if(visit[m-1]==0) enfile(&F, m);
 
 			if(AR[m-1] > nbr) AR[m-1] = nbr; // actualisation du plus petit nbr d'arêtes
-			printf("\nJJJJJJJJJJ AR m  %d", AR[m-1]);
+			
 			if(m==v) return AR[v-1]; // on a trouvé ce qu'on cherche, on peut arreter le processus 
 			
 			cour = cour->suiv; 		
@@ -223,8 +223,7 @@ Cell_entier* chemin(Graphe *G, int u, int v){
 
 	S_file F; Init_file(&F); // la file 
 
-	printf("\n G = %d; %d; %d", G->T_som[u]->num, G->T_som[u]->L_voisin->a->u, G->T_som[u]->L_voisin->a->v);
-
+	
 	int *visit =(int *)malloc(sizeof(int)*G->nbsom); // tableau pour marquer la visite d'un point 
 	
 	int *AR =(int *)malloc(sizeof(int)*G->nbsom); // tableau pour marquer le nombre d'arretes entre u à tous les autres points y compris v. 
@@ -236,7 +235,7 @@ Cell_entier* chemin(Graphe *G, int u, int v){
 	if(PREC == NULL ){ printf("Echec Alloc PREC"); return NULL;} 
 
 	for(i=0;i<G->nbsom;i++){ visit[i]=0; AR[i]= 600; PREC[i]=-1; } // initialisation du tableau visit à 0 et AR à 600 : considéré comme la distance MAX...l'infini et PREC à -1 
-printf("\nDDDDDDD %d   kkkk %d", AR[11], G->nbsom);
+
 	AR[u-1] = 0; // un point est à distance de 0 de lui-même
 	//visit[u] = 1; 
 	enfile(&F, u); // on marque la visite du point u et on enfile 
@@ -249,8 +248,7 @@ printf("\nDDDDDDD %d   kkkk %d", AR[11], G->nbsom);
 
 		}while(visit[n-1]==1);
 		
-				
-		printf("\nn = %d", n);
+		
 		cour = G->T_som[n]->L_voisin;
 		int nbr = AR[n-1]+1;
 		
@@ -258,12 +256,12 @@ printf("\nDDDDDDD %d   kkkk %d", AR[11], G->nbsom);
 		while(cour){ // cour != NULL
 
 			m = cour->a->u;          // m prend la valeur de l'extreme de l'arête voisine de u donc de n
-printf("\nm = %d", m);			
+			
 			
 			if(m==n) m = cour->a->v;   // si m = n alors m doit prendre la valeur de l'autre extreme de l'arete voisine de u 
-printf("\nm = %d", m);
+
 			if(m==n) cour = cour->suiv; // si c'est toujours le cas, on passe au suivant
-printf("\nm = %d", m);
+
 				
 			if(visit[m-1]==0) enfile(&F, m);
 
@@ -298,7 +296,7 @@ printf("\nm = %d", m);
 				}
 
 			}
-			printf("\nJJJJJJJJJJ AR m  %d", AR[m-1]);
+			
 			cour = cour->suiv; 		
 		}
 		
@@ -343,6 +341,285 @@ void ecrire_file(char* filenamencha, Graphe* G)
 		}
 
 		fprintf(f,"-1\n");
+	}
+
+	fclose(f);
+}
+
+
+
+/*************** Pour Dijisktra et consort : les ajouts **************************/
+
+
+/* initialisation du tas */
+
+void Init_Tas( Tas** T)
+{
+	*T =(Tas*)malloc(sizeof(Tas));
+	if(*T==NULL){ printf("\nerror alloc Tas\n"); return;}
+
+	(*T)->n = 0; // pas d'Element dans le tas
+
+	(*T)->tab =(Element*)malloc(sizeof(Element)*(MAX+1));
+	if((*T)->tab==NULL){printf("\nerror alloc Tas->tab\n"); return;}
+		
+	(*T)->Marque =(int*)malloc(sizeof(int)*(MAX+1));
+	if((*T)->Marque==NULL){printf("\nerror alloc Tas->Marque\n"); return;}
+
+	int i;
+	for(i=0;i<=MAX;i++){
+
+		(*T)->Marque[i]=0;
+	}
+}
+
+
+/******************* Quelques fonctions indispensables ********************************* */
+
+
+/* Fonction d'entassement : pour déplacer de 1 les valeurs entre i et j avec j = *T->n */
+
+void avancer(Tas** T, int i, int j)
+{
+	int k;
+	for(k=j;k>=i;k--){
+
+		(*T)->tab[k+1].i =(*T)->tab[k].i;
+		(*T)->tab[k+1].c =(*T)->tab[k].c;		
+	}
+}
+
+/* Fonction d'entassement : pour déplacer de -1 les valeurs entre i et j avec j = *T->n */
+
+void reculer(Tas** T, int i, int j)
+{
+	int k;
+	for(k=i;k<=j;k++){
+
+		(*T)->tab[k-1].i = (*T)->tab[k].i;
+		(*T)->tab[k-1].c = (*T)->tab[k].c;		
+	}
+
+	(*T)->tab[j].c = 1000; // considéré comme linfini
+}
+
+/* insertion dun Element dans un tas */
+
+void insert(Tas** T, Element E)
+{	
+	if((*T)->n>=MAX){ printf("\ninsert impossible, Tas plein\n"); return;}
+	
+	(*T)->Marque[E.i] = 1; // on marque l'insertion de E
+
+	if(E.c <= (*T)->tab[1].c){
+
+		avancer(T, 1,(*T)->n);
+		(*T)->tab[1].i = E.i;
+		(*T)->tab[1].c = E.c;
+		(*T)->n++;
+		return;
+	}
+
+	if(E.c >= (*T)->tab[(*T)->n].c){
+
+		
+		(*T)->tab[(*T)->n+1].i =E.i;
+		(*T)->tab[(*T)->n+1].c =E.c;
+		(*T)->n++;
+		return;
+	}
+
+	int i;
+
+	for(i=2;i<=(*T)->n-1;i++){
+
+		if(E.c <= (*T)->tab[i].c){
+
+			avancer(T, i, (*T)->n);
+			(*T)->tab[i].i = E.i;
+			(*T)->tab[i].c = E.c;
+			(*T)->n++;
+			return;
+		}
+	
+	}
+}
+
+/* Tester la présence d'un Element dans le tas */
+
+int test(Tas* T, int i)
+{
+	return T->Marque[i];
+
+}
+
+/* Accès à l'Element ayant le plus petit c */
+
+Element* petit_c(Tas* T)
+{
+	return &(T->tab[1]);
+
+}
+
+/* Suppresion de l'Element ayant le plus petit c */
+
+void delecte(Tas** T)
+{
+	int i=(*T)->tab[1].i;
+	(*T)->Marque[i] = -1; // demarquage 
+	reculer(T,2, (*T)->n);
+	(*T)->n--;
+}
+
+/* suppresion de l'Element d'indice i s'il existe */
+
+void suppression(Tas**T, int i)
+{
+	if( test((*T), i)!=1){ printf("\n pas présent\n"); return;}
+
+	if((*T)->tab[1].i == i){ delecte(T); return; }
+
+	if((*T)->tab[(*T)->n].i == i){
+
+		int s =(*T)->tab[1].i;
+		(*T)->Marque[s] = -1; // demarquage 
+		(*T)->n--;
+	}
+
+	int j;
+
+	for(j=2;j<=(*T)->n-1;j++){
+
+		if(i == (*T)->tab[j].i){
+
+			(*T)->Marque[j] = -1; // demarquage 
+			reculer(T, j+1, (*T)->n);
+			
+			(*T)->n--;
+			return;
+		}
+	}
+}
+
+
+/*  Fonction DIJIKSTRA : retourne la longueur (longueur totale) de la chaine de e1 à e2 */
+
+double dijikstra(Graphe* G, int e1, int e2)
+{
+	int nb = G->nbsom; // nombre de sommets
+
+	int *pred = (int*)malloc(sizeof(int)*nb+1); // tableau des précédans
+
+	double *distance = (double*)malloc(sizeof(double)*nb+1);
+
+	if(pred==NULL || distance==NULL){
+
+		printf("\n problème d'alloc pred ou distance\n");
+		return -1;
+	}
+	
+	/* initialisation de pred et distance  */
+
+	int i;
+	for(i=1;i<=nb;i++){
+
+		pred[i]=-1; // pas encore de prédecesseur
+		distance[i]=50000; // considéré comme la disatnce max... l'infini
+		
+	}
+
+	distance[e1]=0; // e1 est de distance 0 de lui-même
+
+	/* initialisation du tas */
+
+	Tas *T;
+	Init_Tas(&T);
+
+	T->Marque[e1]=-1; // déjà visité
+
+	int p, q, s;
+	double dis;
+
+	p = e1; q = e2;
+
+	Cellule_arete *cour;
+
+	Element E, *F;
+
+	do{
+
+		dis = distance[p];
+
+		cour = G->T_som[p]->L_voisin;
+		
+		while(cour){
+			
+			s=cour->a->u;
+
+			if(p==s) s=cour->a->v;
+
+			if(p==s) return -107; // pour marquer l'erreur			
+
+
+
+			if(test(T,s)==0){ // s'il n'est jamais marqué alors l'insérer
+				
+				E.i = s;
+				E.c = cour->a->longueur;				
+				insert(&T, E);
+
+			}		
+			
+			if(cour->a->longueur+dis < distance[s]){ 
+
+				distance[s] = cour->a->longueur+dis; // mise à jour de la distance de s par rapport au point de départ
+
+				pred[s] = p;	// mise à jour du précédant de s
+ 
+			}
+		
+			cour = cour->suiv;
+		}
+
+		F = petit_c(T); // Element ayant le plus petit c
+
+		delecte(&T);	// on supprime cet Element de T
+		
+		p=F->i;
+	
+	
+	}while( (T->n>=0 && T->n<=MAX) || T->Marque[p]==1);
+	
+	return distance[q]; // longueur de la chaine de e1 à e2
+
+}
+
+/* Permet d'écrire les évaluations des commodités dans un fichier avec extension .eval  Ce fichier contiendra par ligne longueur ( de Dijikstra) evaluation. Donc deux valeurs par ligne */
+
+void ecrire_eval(Graphe *G, char* fichier, char* fic_eval ) // fic_eval correspond au fichier pour utiliser la fonction evaluation
+{
+	FILE *f = fopen(fichier, "w+");
+	
+	double longueur, eval;
+	int i, a, b;
+
+	int gamma =G->gamma;
+
+	if(f!=NULL){
+
+		for(i=0;i<G->nbcommod;i++){
+   
+			a = G->T_commod[i].e1;
+    			b = G->T_commod[i].e2;
+
+			longueur = dijikstra(G, a, b);
+			eval = evaluation_NChaines(0, 0,fic_eval);
+		
+			fprintf(f,"%lf %lf\n", longueur, eval);
+
+		
+		}
+
 	}
 
 	fclose(f);
