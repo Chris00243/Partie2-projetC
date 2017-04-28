@@ -45,14 +45,15 @@ int main(int argc,char**argv)
 
   
 
-  Graphe G;
+  Graphe G, *G1;
 
   lecture_graphe(&G,f);
 
-  fclose(f);
-
-	Arete * a;
   
+  fclose(f);
+	G1 = cal_gamma(&G); // G1 contient G mais avec le cal_gamma actualisé.
+	Arete * a;
+  printf("\n G = %d\n", G1->T_som[4]->gamma_total);
 
 	int choix, select;
 	
@@ -73,7 +74,7 @@ int main(int argc,char**argv)
 					scanf("%d", &u);
 					printf("Entrez le second entier : ");
 					scanf("%d", &v);
-					ajout_voisin(&G,u,v);
+					ajout_voisin(G1,u,v);
 					break;
 			}
 
@@ -83,12 +84,12 @@ int main(int argc,char**argv)
 					scanf("%d", &u);
 					printf("Entrez le second entier : ");
 					scanf("%d", &v);
-					a = acces_arete(&G,u,v);
+					a = acces_arete(G1,u,v);
 					break;
 			}
 
 			case 3 :{
-	 				affichageGrapheSVG(&G,filename); // le nom du filename est passé en argument lors de l'exécution du programme
+	 				affichageGrapheSVG(G1,filename); // le nom du filename est passé en argument lors de l'exécution du programme
 					break;
 			}
 
@@ -98,7 +99,7 @@ int main(int argc,char**argv)
 					printf("Entrez le second entier : ");
 					scanf("%d", &v);
 
-					nbr = plus_petit_nbr_arete(&G,u,v);
+					nbr = plus_petit_nbr_arete(G1,u,v);
 					printf("\n nombre d'arêtes de %d à %d est %d\n", u,v,nbr); // si nbr == 600; d'après la fonction il n'y a pas de chemin de u à v
 					
 					break;
@@ -112,14 +113,14 @@ int main(int argc,char**argv)
 					printf("Entrez le second entier : ");
 					scanf("%d", &v);
 					Cell_entier *L;
-					L = chemin(&G, u,  v);
+					L = chemin(G1, u,  v);
 					afficherListeEntier(L);
 					break;
 			}
 
 			case 6 : {
 
-					ecrire_file(filenamencha, &G);
+					ecrire_file(filenamencha, G1);
 					break;
 			}
 
@@ -129,7 +130,7 @@ int main(int argc,char**argv)
 					scanf("%d", &u);
 					printf("Entrez le second entier : ");
 					scanf("%d", &v);
-					double nb = dijikstra(&G,u,v); 	
+					double nb = dijikstra(G1,u,v); 	
 					printf("\n longueur = %lf\n\n", nb);
 					break;
 			}
@@ -147,19 +148,19 @@ int main(int argc,char**argv)
 
 						case 1 : {
 								 strcpy(fic_eval,"00783_rat.res");
-								 ecrire_eval(&G, fichier,fic_eval);
+								 ecrire_eval(G1, fichier,fic_eval);
 								break;
 						}
 			
 						case 2 : {
 								 strcpy(fic_eval,"05934_rl.res");
-								 ecrire_eval(&G, fichier,fic_eval);
+								 ecrire_eval(G1, fichier,fic_eval);
 								break;
 						}
 
 						case 3 : {
 								 strcpy(fic_eval,"07397_pla.res");
-								 ecrire_eval(&G, fichier,fic_eval);
+								 ecrire_eval(G1, fichier,fic_eval);
 								break;
 						}
 

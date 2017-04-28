@@ -40,7 +40,7 @@ typedef struct {
  /**************************************************/
  /* Emplacement des donnees utiles aux algorithmes */
 
- 
+ 	int gamma_total; // contient la somme des gammas partant de ce sommet comme commodité e1 à e2
 
  /**************************************************/
 
@@ -145,6 +145,10 @@ double dijikstra(Graphe* G, int e1, int e2);
 /* Permet d'écrire les évaluations des commodités dans un fichier avec extension .eval  Ce fichier contiendra par ligne longueur ( de Dijikstra) evaluation. Donc deux valeurs par ligne */
 
 void ecrire_eval(Graphe *G, char* fichier, char* fic_eval ); // fic_eval correspond au fichier pour utiliser la fonction evaluation
+
+
+/* Calcul le gamma et actualise dans le graphe */
+Graphe* cal_gamma(Graphe *G);
 
 
 

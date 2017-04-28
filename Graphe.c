@@ -602,20 +602,22 @@ void ecrire_eval(Graphe *G, char* fichier, char* fic_eval ) // fic_eval correspo
 	
 	double longueur, eval;
 	int i, a, b;
-
-	int gamma =G->gamma;
-
+	
+	int gamma =0;
+	
 	if(f!=NULL){
 
 		for(i=0;i<G->nbcommod;i++){
    
 			a = G->T_commod[i].e1;
     			b = G->T_commod[i].e2;
-
+			
+			gamma = G->T_som[a]->gamma_total;			
+						
 			longueur = dijikstra(G, a, b);
-			eval = evaluation_NChaines(0, 0,fic_eval);
+			eval = evaluation_NChaines(25, 96282.54,fic_eval);
 		
-			fprintf(f,"%lf %lf\n", longueur, eval);
+			fprintf(f,"%lf %lf\n", longueur , eval);
 
 		
 		}
@@ -624,4 +626,86 @@ void ecrire_eval(Graphe *G, char* fichier, char* fic_eval ) // fic_eval correspo
 
 	fclose(f);
 }
+
+
+/* Calcul le gamma et actualise dans le graphe */
+
+Graphe* cal_gamma(Graphe *G)
+{
+	
+
+	int nb=G->nbsom;
+	
+	int** M =(int**)malloc(sizeof(int*)*nb+1);
+
+	 /* M:  la matrice contenant les gamma */
+	
+	int i, j;	
+
+	for(i=1;i<=nb;i++){
+
+		M[i]=(int*)malloc(sizeof(int)*nb+1);
+
+		for(j=1;j<=nb;j++){
+
+			M[i][j]=0;
+		}
+		
+	}
+
+	int n = G->nbcommod; // nombre de commodités
+
+	Cell_entier* L;
+	int a, b;
+
+	for(i=0;i<n;i++){
+
+		a = G->T_commod[i].e1;
+    		b = G->T_commod[i].e2;
+		L = chemin(G,a,b);
+	
+		while(L!=NULL && L->suiv!=NULL){
+
+			a=L->u;
+			b=L->suiv->u;
+
+			M[a][b] = M[a][b]+1; // actualisation de gamma
+			M[b][a] = M[b][a]+1; // actualisation de gamma
+		
+			L=L->suiv;	
+		}
+
+	}
+
+	Cellule_arete *cour;
+
+	int gamma_total =0;
+
+	for(i=1;i<=nb;i++){
+		
+		cour = G->T_som[i]->L_voisin;
+
+		while(cour){
+			
+			j=cour->a->u;
+			if(j==i) j=cour->a->v;
+
+			cour->a->calc_gamma = M[i][j];
+			if(cour->a->calc_gamma == 0) cour->a->calc_gamma = 1; // par relation de voisinage
+
+			gamma_total += cour->a->calc_gamma;
+			cour = cour->suiv;
+		}
+		
+
+		G->T_som[i]->gamma_total=gamma_total;
+		gamma_total =0;
+	}
+
+	
+	return G;
+}
+
+
+
 
